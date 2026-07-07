@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Housing Price Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen py-10 px-4">
+
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+        <h2 class="text-3xl font-bold mb-6 text-slate-800 text-center">Housing Price Predictor</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="number" id="area" placeholder="Area (sqft)" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="number" id="bedrooms" placeholder="Bedrooms" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="number" id="bathrooms" placeholder="Bathrooms" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="number" id="stories" placeholder="Stories" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="number" id="parking" placeholder="Parking Spots" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+
+            <select id="mainroad" class="p-3 border border-slate-300 rounded-lg">
+                <option value="" disabled selected>Mainroad</option>
+                <option value="yes">Yes</option><option value="no">No</option>
+            </select>
+            <select id="guestroom" class="p-3 border border-slate-300 rounded-lg">
+                <option value="" disabled selected>Guestroom</option>
+                <option value="yes">Yes</option><option value="no">No</option>
+            </select>
+            <select id="basement" class="p-3 border border-slate-300 rounded-lg">
+                <option value="" disabled selected>Basement</option>
+                <option value="yes">Yes</option><option value="no">No</option>
+            </select>
+            <select id="hotwaterheating" class="p-3 border border-slate-300 rounded-lg">
+                <option value="" disabled selected>Hot Water Heating</option>
+                <option value="yes">Yes</option><option value="no">No</option>
+            </select>
+            <select id="airconditioning" class="p-3 border border-slate-300 rounded-lg">
+                <option value="" disabled selected>Air Conditioning</option>
+                <option value="yes">Yes</option><option value="no">No</option>
+            </select>
+            <select id="prefarea" class="p-3 border border-slate-300 rounded-lg">
+                <option value="" disabled selected>Pref Area</option>
+                <option value="yes">Yes</option><option value="no">No</option>
+            </select>
+            <select id="furnishingstatus" class="p-3 border border-slate-300 rounded-lg md:col-span-2">
+                <option value="" disabled selected>Furnishing Status</option>
+                <option value="furnished">Furnished</option>
+                <option value="semi-furnished">Semi-furnished</option>
+                <option value="unfurnished">Unfurnished</option>
+            </select>
+        </div>
+
+        <button onclick="getPrediction()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200">
+            Predict Price
+        </button>
+
+        <div id="result-container" class="mt-8 p-4 bg-slate-100 rounded-lg hidden">
+            <h3 id="result" class="text-xl text-slate-700 text-center font-semibold"></h3>
+        </div>
+    </div>
+
+    <script>
+        async function getPrediction() {
+            // Collect data from inputs
+            const data = {
+                area: parseInt(document.getElementById('area').value),
+                bedrooms: parseInt(document.getElementById('bedrooms').value),
+                bathrooms: parseInt(document.getElementById('bathrooms').value),
+                stories: parseInt(document.getElementById('stories').value),
+                mainroad: document.getElementById('mainroad').value,
+                guestroom: document.getElementById('guestroom').value,
+                basement: document.getElementById('basement').value,
+                hotwaterheating: document.getElementById('hotwaterheating').value,
+                airconditioning: document.getElementById('airconditioning').value,
+                parking: parseInt(document.getElementById('parking').value),
+                prefarea: document.getElementById('prefarea').value,
+                furnishingstatus: document.getElementById('furnishingstatus').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                // Show result (using Indian currency formatted value from backend)
+                document.getElementById('result-container').classList.remove('hidden');
+                document.getElementById('result').innerText = "Predicted Price: " + result.predicted_price_formatted;
+            } catch (error) {
+                alert("Error connecting to server. Make sure main.py is running!");
+            }
+        }
+    </script>
+</body>
+</html>
