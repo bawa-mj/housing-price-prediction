@@ -1,98 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Housing Price Predictor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Housing Price Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16232f;
+    --blueprint: #2c4a6e;
+    --blueprint-light: #3d6690;
+    --paper: #f6f3ea;
+    --paper-line: #e2dccb;
+    --copper: #b8763e;
+    --copper-dark: #9c5f2e;
+    --slate: #6b7580;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--paper);
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    height: 100svh;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .sheet {
+    width: 100%;
+    max-width: none;
+    height: 100svh;
+    overflow-y: auto;
+    margin: 0;
+    background: #fffdf8;
+    border: none;
+    box-shadow: none;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (max-width: 480px) {
+    .sheet { box-shadow: 4px 4px 0 rgba(22,35,47,0.12); }
+  }
+
+  .titleblock {
+    border-bottom: 1.5px solid var(--ink);
+    padding: clamp(18px, 3vw, 28px) clamp(18px, 4.5vw, 36px) clamp(14px, 2vw, 20px);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .titleblock .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--copper-dark);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .titleblock h1 {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800;
+    font-size: clamp(21px, 4.5vw, 28px);
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    line-height: 1.15;
+  }
+  .titleblock .doc-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--slate);
+    text-align: right;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  .body-pad {
+    padding: clamp(20px, 3vw, 40px) clamp(24px, 6vw, 80px);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blueprint);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--paper-line);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(8px, 1.6vw, 12px);
+    margin-bottom: clamp(16px, 2.5vw, 20px);
+  }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 380px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .field input, .field select {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    padding: 12px;
+    min-height: 46px;
+    width: 100%;
+    border: 1.5px solid #d8d2c2;
+    background: #fffdf8;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    border-radius: 2px;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--blueprint);
+    background: #fff;
+  }
+  .field input::placeholder { color: #b4ad9a; }
+  .field select { appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7580' stroke-width='1.5' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .field.wide { grid-column: 1 / -1; }
+
+  .predict-btn {
+    width: 100%;
+    min-height: 52px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: clamp(14px, 2.2vw, 15px);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 16px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s ease;
+  }
+  .predict-btn:hover { background: var(--blueprint); }
+  .predict-btn:active { transform: translateY(1px); }
+  .predict-btn:disabled { background: #b4ad9a; cursor: not-allowed; }
+
+  .result-wrap {
+    margin-top: 18px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .result-wrap.show { max-height: 300px; }
+
+  .stamp {
+    border: 2px solid var(--copper);
+    padding: clamp(16px, 3.5vw, 22px) clamp(16px, 4vw, 24px);
+    position: relative;
+    background: repeating-linear-gradient(135deg, rgba(184,118,62,0.04) 0px, rgba(184,118,62,0.04) 2px, transparent 2px, transparent 12px);
+  }
+  .stamp .stamp-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--copper-dark);
+    margin-bottom: 8px;
+  }
+  .stamp .stamp-value {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800;
+    font-size: clamp(24px, 6.5vw, 36px);
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    word-break: break-word;
+  }
+  .stamp .stamp-note {
+    font-size: 12px;
+    color: var(--slate);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  .error-box {
+    margin-top: 16px;
+    border: 1.5px solid #b3413d;
+    background: #fdf3f2;
+    color: #8a2e2a;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    display: none;
+  }
+  .error-box.show { display: block; }
+
+  .footnote {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--slate);
+    text-align: center;
+    margin-top: 14px;
+    letter-spacing: 0.03em;
+  }
+</style>
 </head>
-<body class="bg-slate-50 min-h-screen py-10 px-4">
+<body>
 
-    <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-slate-200">
-        <h2 class="text-3xl font-bold mb-6 text-slate-800 text-center">Housing Price Predictor</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="number" id="area" placeholder="Area (sqft)" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-            <input type="number" id="bedrooms" placeholder="Bedrooms" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-            <input type="number" id="bathrooms" placeholder="Bathrooms" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-            <input type="number" id="stories" placeholder="Stories" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-            <input type="number" id="parking" placeholder="Parking Spots" class="p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-
-            <select id="mainroad" class="p-3 border border-slate-300 rounded-lg">
-                <option value="" disabled selected>Mainroad</option>
-                <option value="yes">Yes</option><option value="no">No</option>
-            </select>
-            <select id="guestroom" class="p-3 border border-slate-300 rounded-lg">
-                <option value="" disabled selected>Guestroom</option>
-                <option value="yes">Yes</option><option value="no">No</option>
-            </select>
-            <select id="basement" class="p-3 border border-slate-300 rounded-lg">
-                <option value="" disabled selected>Basement</option>
-                <option value="yes">Yes</option><option value="no">No</option>
-            </select>
-            <select id="hotwaterheating" class="p-3 border border-slate-300 rounded-lg">
-                <option value="" disabled selected>Hot Water Heating</option>
-                <option value="yes">Yes</option><option value="no">No</option>
-            </select>
-            <select id="airconditioning" class="p-3 border border-slate-300 rounded-lg">
-                <option value="" disabled selected>Air Conditioning</option>
-                <option value="yes">Yes</option><option value="no">No</option>
-            </select>
-            <select id="prefarea" class="p-3 border border-slate-300 rounded-lg">
-                <option value="" disabled selected>Pref Area</option>
-                <option value="yes">Yes</option><option value="no">No</option>
-            </select>
-            <select id="furnishingstatus" class="p-3 border border-slate-300 rounded-lg md:col-span-2">
-                <option value="" disabled selected>Furnishing Status</option>
-                <option value="furnished">Furnished</option>
-                <option value="semi-furnished">Semi-furnished</option>
-                <option value="unfurnished">Unfurnished</option>
-            </select>
-        </div>
-
-        <button onclick="getPrediction()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200">
-            Predict Price
-        </button>
-
-        <div id="result-container" class="mt-8 p-4 bg-slate-100 rounded-lg hidden">
-            <h3 id="result" class="text-xl text-slate-700 text-center font-semibold"></h3>
-        </div>
+  <div class="sheet">
+    <div class="titleblock">
+      <div>
+        <h1>Housing Price Predictor</h1>
+      </div>
     </div>
 
-    <script>
-        async function getPrediction() {
-            // Collect data from inputs
-            const data = {
-                area: parseInt(document.getElementById('area').value),
-                bedrooms: parseInt(document.getElementById('bedrooms').value),
-                bathrooms: parseInt(document.getElementById('bathrooms').value),
-                stories: parseInt(document.getElementById('stories').value),
-                mainroad: document.getElementById('mainroad').value,
-                guestroom: document.getElementById('guestroom').value,
-                basement: document.getElementById('basement').value,
-                hotwaterheating: document.getElementById('hotwaterheating').value,
-                airconditioning: document.getElementById('airconditioning').value,
-                parking: parseInt(document.getElementById('parking').value),
-                prefarea: document.getElementById('prefarea').value,
-                furnishingstatus: document.getElementById('furnishingstatus').value
-            };
+    <div class="body-pad">
 
-            try {
-                const response = await fetch('http://127.0.0.1:8000/predict', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
+      <div class="section-label">Property specification</div>
+      <div class="grid">
+        <div class="field">
+          <label for="area">Area (sq ft)</label>
+          <input type="number" id="area" placeholder="e.g. 6000" min="0">
+        </div>
+        <div class="field">
+          <label for="parking">Parking spots</label>
+          <input type="number" id="parking" placeholder="e.g. 2" min="0">
+        </div>
+        <div class="field">
+          <label for="bedrooms">Bedrooms</label>
+          <input type="number" id="bedrooms" placeholder="e.g. 3" min="0">
+        </div>
+        <div class="field">
+          <label for="bathrooms">Bathrooms</label>
+          <input type="number" id="bathrooms" placeholder="e.g. 2" min="0">
+        </div>
+        <div class="field">
+          <label for="stories">Stories</label>
+          <input type="number" id="stories" placeholder="e.g. 2" min="0">
+        </div>
+        <div class="field">
+          <label for="furnishingstatus">Furnishing status</label>
+          <select id="furnishingstatus">
+            <option value="" disabled selected>Select status</option>
+            <option value="furnished">Furnished</option>
+            <option value="semi-furnished">Semi&#8209;furnished</option>
+            <option value="unfurnished">Unfurnished</option>
+          </select>
+        </div>
+      </div>
 
-                const result = await response.json();
-                
-                // Show result (using Indian currency formatted value from backend)
-                document.getElementById('result-container').classList.remove('hidden');
-                document.getElementById('result').innerText = "Predicted Price: " + result.predicted_price_formatted;
-            } catch (error) {
-                alert("Error connecting to server. Make sure main.py is running!");
-            }
-        }
-    </script>
+      <div class="section-label">Site &amp; amenities</div>
+      <div class="grid">
+        <div class="field">
+          <label for="mainroad">Main road access</label>
+          <select id="mainroad">
+            <option value="" disabled selected>Select</option>
+            <option value="yes">Yes</option><option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="prefarea">Preferred area</label>
+          <select id="prefarea">
+            <option value="" disabled selected>Select</option>
+            <option value="yes">Yes</option><option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="guestroom">Guest room</label>
+          <select id="guestroom">
+            <option value="" disabled selected>Select</option>
+            <option value="yes">Yes</option><option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="basement">Basement</label>
+          <select id="basement">
+            <option value="" disabled selected>Select</option>
+            <option value="yes">Yes</option><option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="hotwaterheating">Hot water heating</label>
+          <select id="hotwaterheating">
+            <option value="" disabled selected>Select</option>
+            <option value="yes">Yes</option><option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="airconditioning">Air conditioning</label>
+          <select id="airconditioning">
+            <option value="" disabled selected>Select</option>
+            <option value="yes">Yes</option><option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="predict-btn" id="predictBtn" onclick="getPrediction()">Estimate Value</button>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <div class="result-wrap" id="resultWrap">
+        <div class="stamp">
+          <div class="stamp-label">Estimated market value</div>
+          <div class="stamp-value" id="resultValue">—</div>
+          <div class="stamp-note">Generated by regression model · for reference only, not a certified appraisal</div>
+        </div>
+      </div>
+
+      <div class="footnote">HOUSING-PRICE-PREDICTION · FASTAPI + SCIKIT&#8209;LEARN</div>
+    </div>
+  </div>
+
+  <script>
+    async function getPrediction() {
+      const btn = document.getElementById('predictBtn');
+      const errorBox = document.getElementById('errorBox');
+      const resultWrap = document.getElementById('resultWrap');
+
+      errorBox.classList.remove('show');
+      resultWrap.classList.remove('show');
+
+      const fields = ['area','bedrooms','bathrooms','stories','mainroad','guestroom',
+                       'basement','hotwaterheating','airconditioning','parking',
+                       'prefarea','furnishingstatus'];
+
+      const values = {};
+      let missing = false;
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        values[id] = el.value;
+        if (values[id] === '' || values[id] === null) missing = true;
+      });
+
+      if (missing) {
+        errorBox.textContent = 'Please fill in every field before requesting an estimate.';
+        errorBox.classList.add('show');
+        return;
+      }
+
+      const data = {
+        area: parseInt(values.area),
+        bedrooms: parseInt(values.bedrooms),
+        bathrooms: parseInt(values.bathrooms),
+        stories: parseInt(values.stories),
+        mainroad: values.mainroad,
+        guestroom: values.guestroom,
+        basement: values.basement,
+        hotwaterheating: values.hotwaterheating,
+        airconditioning: values.airconditioning,
+        parking: parseInt(values.parking),
+        prefarea: values.prefarea,
+        furnishingstatus: values.furnishingstatus
+      };
+
+      btn.disabled = true;
+      btn.textContent = 'Calculating…';
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error('Server returned an error');
+
+        const result = await response.json();
+
+        document.getElementById('resultValue').textContent =
+          result.predicted_price_formatted || ('₹' + Number(result.predicted_price).toLocaleString('en-IN'));
+        resultWrap.classList.add('show');
+      } catch (error) {
+        errorBox.textContent = 'Could not connect to the prediction server. Make sure main.py is running on port 8000.';
+        errorBox.classList.add('show');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Estimate Value';
+      }
+    }
+  </script>
 </body>
 </html>
