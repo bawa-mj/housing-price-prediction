@@ -30,7 +30,7 @@ Open `http://127.0.0.1:8000` in your browser.
 
 ## 📸 Application Preview
 ### 🎛️ Prediction Form UI
-![Housing Price Predictor UI]([https://github.com/bawa-mj/housing-price-prediction/blob/main/screenshot.png?raw=true](https://github.com/bawa-mj/housing-price-prediction/blob/main/data/Housing%20Price%20Predictor.png))
+![Housing Price Predictor UI](https://github.com/bawa-mj/housing-price-prediction/blob/main/Housing%20Price%20Predictor.png))
 
 ## ⚠️ Disclaimer
 This tool provides an estimated value based on a machine learning model trained on historical data. It is intended for reference and educational purposes only, and should not be treated as a certified property appraisal.
