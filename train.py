@@ -9,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.ensemble import GradientBoostingRegressor
 
 # Load Data
-df = pd.read_csv("Housing (1).csv")
+df = pd.read_csv("data/Housing (1).csv")
 
 # Binary Encoding
 binary_cols = ['mainroad', 'guestroom', 'basement', 'hotwaterheating', 'airconditioning', 'prefarea']
